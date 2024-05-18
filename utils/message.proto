@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+message ServerHello {
+    int32 sessionId = 1;
+    string n = 2;
+    string e = 3;
+    string ca = 4;
+    string s_rnd = 5;
+}

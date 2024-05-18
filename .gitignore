@@ -1,0 +1,21 @@
+# CMake build directory
+build/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# CMake toolchain files
+CMakeLists.txt.user
+CMakeLists.txt.user.in
+
+# CMake package files
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# VSCode files
+.vscode/
