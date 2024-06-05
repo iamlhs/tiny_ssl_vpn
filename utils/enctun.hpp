@@ -12,7 +12,8 @@ class enctun : public std::enable_shared_from_this<enctun> {
     //初始化加密和解密用的 Chacha20 对象，并分配缓冲区。
     //nonce（Number Once）是一个在加密会话中只使用一次的随机数或计数器值。它的目的是增加通信的安全性，防止重放攻击（replay attacks）。在 VPN 场景中，nonce 通常用于初始化向量（Initialization Vector, IV）的生成，或者是用于提供会话之间的唯一性。
     //ChaCha20 是一个块密码算法，它需要一个 nonce 值和一个初始化向量（IV）来生成密文。这个 nonce 值和密钥一起用来确保每次加密都是唯一的，即使两次传输的数据相同，由于 nonce 值的不同，生成的密文也会不同。
-        enctun(asio::ip::tcp::socket socket, const char key[32], const char nonce[8], uint64_t counter, size_t buffer_size) : socket(std::move(socket)), buffer_size(buffer_size), enc_chacha(key, nonce, counter), dec_chacha(key, nonce, counter) {
+        enctun(asio::ip::tcp::socket socket, const char key[32], const char nonce[8], uint64_t counter, size_t buffer_size) : 
+        socket(std::move(socket)), buffer_size(buffer_size), enc_chacha(key, nonce, counter), dec_chacha(key, nonce, counter) {
             enc_buffer = new unsigned char[buffer_size];
             dec_buffer = new unsigned char[buffer_size];
             #ifdef USE_ZSTD
@@ -52,8 +53,7 @@ class enctun : public std::enable_shared_from_this<enctun> {
 
                 if (socket.available() > 0) {//如果socket有数据等待读取
 					size_t size = socket.read_some(asio::buffer(dec_buffer, buffer_size));
-                    #ifdef USE_ZSTD
-                    //和上面一样，若定义了ZSTD宏则使用其库的解压缩函数
+                    #ifdef USE_ZSTD//和上面一样，若定义了ZSTD宏则使用其库的解压缩函数
                     size = ZSTD_decompress(zstd_dec_buffer, buffer_size, dec_buffer, size);
                     //对解压缩后的数据进行chacha方法解密
                     dec_chacha.crypt(reinterpret_cast<uint8_t*>(zstd_dec_buffer), size);
@@ -70,11 +70,9 @@ class enctun : public std::enable_shared_from_this<enctun> {
                     tun_write(dec_buffer, size);
                     #endif
 				}
-            }
-            
+            }   
             stop();
         }
-
     private:
         void stop() {
             socket.close();
@@ -85,8 +83,6 @@ class enctun : public std::enable_shared_from_this<enctun> {
             delete[] zstd_dec_buffer;
             #endif
         }   
-
-    
     size_t buffer_size;//buffer_size: 缓冲区大小。
     unsigned char *enc_buffer;//enc_buffer 和 dec_buffer: 分别用于存储加密和解密后的数据
     unsigned char *dec_buffer;
